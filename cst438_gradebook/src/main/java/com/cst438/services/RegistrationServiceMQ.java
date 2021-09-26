@@ -44,7 +44,18 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@Transactional
 	public void receive(EnrollmentDTO enrollmentDTO) {
 		
-		//TODO  complete this method in homework 4
+		System.out.println("Receive enrollment :" + enrollmentDTO);
+		Course c = courseRepository.findByCourse_id(enrollmentDTO.course_id);
+		if (c != null) {
+			Enrollment e = new Enrollment();
+			e.setCourse(c);
+			e.setStudentEmail(enrollmentDTO.studentEmail);
+			e.setStudentName(enrollmentDTO.studentName);
+			enrollmentRepository.save(e);
+			System.out.println("Success");
+		} else {
+			System.out.println("Fail");
+		}
 		
 	}
 
@@ -52,7 +63,15 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@Override
 	public void sendFinalGrades(int course_id, CourseDTOG courseDTO) {
 		 
-		//TODO  complete this method in homework 4
+		System.out.println("Sending final grades rabbitmq: " + course_id);
+		
+		// TODO an error such as exchange not found, will not be reported 
+		//      back to caller here because the action is asynchronous. 
+		//      Either make the call transactional, in which case it will 
+		//      wait for commit or monitor the log for ERROR message
+		//  channel error; ... (reply-code=404, reply-text=NOT_FOUND - no exchange 'registration-exchange' ...)
+		
+		rabbitTemplate.convertAndSend(registrationQueue.getName(), courseDTO);
 		
 	}
 
